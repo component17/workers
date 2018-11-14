@@ -3,6 +3,10 @@
 import Vue from 'vue'
 import App from './App'
 import router from './router'
+import store from './store/index'
+
+Vue.prototype.$isDeveloper = process.env.NODE_ENV === 'development';
+Vue.prototype.$hash = require('object-hash')
 
 import uPoint from 'upoint-vue-ui';
 import locale from 'upoint-vue-ui/locale/lang/ru-RU'
@@ -43,12 +47,36 @@ Vue.component('workTable', workTable);
 Vue.use(uPoint, {size: 'mini', locale});
 
 
-Vue.config.productionTip = false
+Vue.config.productionTip = false;
 
-/* eslint-disable no-new */
-new Vue({
-  el: '#app',
-  router,
-  components: { App },
-  template: '<App/>'
-})
+upoint.db.connect().then(() => {
+
+    // r.tableDrop('counterparties').run(conn)
+    // r.tableDrop('counterparties_faces').run(conn)
+    // r.tableDrop('counterparties_bank_details').run(conn)
+    // r.tableDrop('counterparties_locations').run(conn)
+
+    // r.tableCreate('counterparties').run(conn, () => {
+    //     console.log('Table create counterparties')
+    // });
+    // r.tableCreate('counterparties_faces').run(conn, () => {
+    //     console.log('Table create counterparties-faces')
+    //     r.table('counterparties_faces').indexCreate('counterparties_id').run(conn)
+    // });
+    // r.tableCreate('counterparties_bank_details').run(conn, () => {
+    //     console.log('Table create counterparties-bank-details')
+    //     r.table('counterparties_bank_details').indexCreate('counterparties_id').run(conn)
+    // });
+    // r.tableCreate('counterparties_locations').run(conn, () => {
+    //     console.log('Table create counterparties-locations')
+    //     r.table('counterparties_locations').indexCreate('counterparties_id').run(conn)
+    // });
+}).finally(() => {
+    new Vue({
+        el: '#app',
+        router,
+        store,
+        components: {App},
+        template: '<App/>'
+    });
+});

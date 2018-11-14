@@ -27,7 +27,7 @@
       </div>
     </div>
       <template slot="footer-actions">
-        <el-button type="primary" @click="$router.push('/newWorker')" icon="mdi mdi-content-save">Создать сотрудника / Сохранить изменения</el-button>
+        <el-button type="primary" @click="$router.push('/newWorker')" icon="mdi mdi-content-save">Создать сотрудника1 / Сохранить изменения</el-button>
       </template>
 
     </el-card-module>

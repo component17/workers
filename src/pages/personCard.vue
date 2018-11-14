@@ -43,15 +43,15 @@
         </div>
         <div class="personCard__tabs">
             <el-tabs v-model="activeName" type="border-card">
-                <el-tab-pane label="Права доступа" name="accessPO">
+                <el-tab-pane label="Доступ к ПО" name="accessPO">
                     <newWorkerAccessPO/>
                 </el-tab-pane>
-                <el-tab-pane label="Контакты" name="contacts">
-                    <newWorkerContacts/>
-                </el-tab-pane>
-                <el-tab-pane label="Паспорт" name="passport">
-                    <newWorkerPassport/>
-                </el-tab-pane>
+                <!--<el-tab-pane label="Контакты" name="contacts">-->
+                    <!--<newWorkerContacts/>-->
+                <!--</el-tab-pane>-->
+                <!--<el-tab-pane label="Паспорт" name="passport">-->
+                    <!--<newWorkerPassport/>-->
+                <!--</el-tab-pane>-->
             </el-tabs>
         </div>
         <template slot="footer-actions">
