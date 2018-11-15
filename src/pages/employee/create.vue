@@ -162,7 +162,13 @@
                     position: '',
 
                     city: '',
-                    phone: ''
+                    phone: '',
+
+                    deletedAt: '',
+                    uid: '',
+                    group_id: '',
+                    login: '',
+                    password: '',
                 },
                 rules: {
                     name: [
