@@ -27,7 +27,7 @@
                             <newWorkerInfo :main="$store.state.employees.current_employee" ref="info"/>
                         </el-tab-pane>
                         <el-tab-pane label="Доступ к ПО " name="access" :disabled="action_in_process">
-                            <newWorkerAccessPO :main="$store.state.employees.current_employee" ref="access"/>
+                            <newWorkerAccessPO :main="$store.state.employees.current_employee" ref="access" @proccessLoading="loadingProccess" @updateData="updateOldData"/>
                         </el-tab-pane>
                     </el-tabs>
                 </div>
@@ -98,8 +98,8 @@
                 };
                 if(this.$store.state.positions.list === null){
                     this.getPositions();
-                    this.getGroups();
                 }
+                this.getGroups();
             });
         },
         methods: {
@@ -109,6 +109,13 @@
                 getGroups: 'groups/GET_GROUPS_LIST',
                 updateEmployee: 'employees/UPDATE_EMPLOYEE'
             }),
+            loadingProccess(value){
+                this.action_in_process = value;
+            },
+            updateOldData(object){
+                this.old_data.uid = object.uid;
+                this.old_data.group_id = object.group_id;
+            },
             save(){
                 this.action_in_process = true;
 
