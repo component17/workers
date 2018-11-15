@@ -114,7 +114,7 @@
                 <el-button @click="$router.push('/')" :disabled="is_loading_action">Отмена</el-button>
                 <el-button type="primary"
                            :icon="is_loading_action ? '' : 'mdi mdi-content-save'"
-                           :disabled="model.name.length < 2 || model.surname.length < 2 || !model.patronymic.length || !model.position.length"
+                           :disabled="model.name.length < 2 || model.surname.length < 2 || !model.position.length"
                            :loading="is_loading_action"
                            @click="createNewEmployee"
                 >Создать сотрудника</el-button>
@@ -164,7 +164,7 @@
                     city: '',
                     phone: '',
 
-                    deletedAt: '',
+                    deletedAt: null,
                     uid: '',
                     group_id: '',
                     login: '',

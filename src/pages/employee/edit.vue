@@ -168,7 +168,7 @@
                 const new_data = {...this.$refs.info.model, ...this.$refs.access.model};
 
                 if(this.checkHashSum(this.old_data, new_data)){
-                    this.$router.go(-1);
+                    this.$router.push('/');
                 }else{
                     this.warning_dialog = true;
                 }

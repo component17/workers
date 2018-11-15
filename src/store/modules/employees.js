@@ -12,7 +12,7 @@ const store = {
             state.list = array;
         },
         CREATE_NEW_EMPLOYEE(state, object){
-            state.list = object;
+            state.list.push(object);
         },
         GET_EMPLOYEE(state, object = null){
             state.current_employee = object;
