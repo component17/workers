@@ -5,14 +5,7 @@
                 <el-input placeholder="Найти сотрудника" :disabled="true"/>
             </div>
             <div class="workersList__head-actions">
-                <el-button icon="mdi mdi-delete" :disabled="true">Удалить выбранные</el-button>
-                <!--<el-select v-model="groupActionsValue" placeholder="Групповые действия" :disabled="true">-->
-                    <!--<el-option-->
-                            <!--v-for="item in groupActions"-->
-                            <!--:label="item.title"-->
-                            <!--:value="item.value">-->
-                    <!--</el-option>-->
-                <!--</el-select>-->
+                <el-button icon="mdi mdi-delete" :disabled="!selected.length" @click="dialog_delete_workers = true">Удалить выбранные</el-button>
             </div>
         </div>
         <div class="workersList__table">
@@ -20,6 +13,7 @@
                     :data="list"
                     border
                     style="width: 100%"
+                    @selection-change="handleSelectionChange"
                     :cell-class-name="cellClass">
                 <el-table-column
                         type="selection"
@@ -105,15 +99,7 @@
                             <el-button type="text" @click="$router.push(`employee/edit/${scope.row.id}`)">
                                 <i class="mdi mdi-pencil"></i>
                             </el-button>
-                            <!--<el-button type="text"-->
-                                       <!--:disabled="true"-->
-                                <!--:class="scope.row.blocked? 'userBlock' : ''"-->
-                                <!--@click="!scope.row.blocked ? dialogUserBlock = true : dialogUserUnblock = true"-->
-                            <!--&gt;-->
-                                <!--&lt;!&ndash;@click="(!scope.row.blocked ? dialogUserBlock = true : dialogUserUnblock = true) ..... blockUser(scope.$index, !scope.row.blocked))&ndash;&gt;-->
-                                <!--<i class="mdi mdi-block-helper"></i>-->
-                            <!--</el-button>-->
-                            <el-button type="text" @click="dialogUserDelete = true" :disabled="true">
+                            <el-button type="text" @click="tmp_user = scope.row; dialog_delete_user = true">
                                 <i class="mdi mdi-delete"></i>
                             </el-button>
                         </div>
@@ -121,119 +107,36 @@
                 </el-table-column>
             </el-table>
         </div>
-        <!--&lt;!&ndash;Заблокировать сотрудника&ndash;&gt;-->
-        <!--<el-dialog-->
-                <!--title="Заблокировать сотрудника"-->
-                <!--:visible.sync="dialogUserBlock"-->
-                <!--width="520px"-->
-                <!--top="calc(50vh - 90px)"-->
-                <!--:show-close="false">-->
-            <!--<span>Вы действительно хотите ограничить доступ сотрудника <b>{{userMail}}</b> к конфигурации? Активный сеанс будет автоматически завершен.</span>-->
-            <!--<span slot="footer" class="dialog-footer">-->
-                <!--<el-button plain @click="dialogUserBlock = false">Отмена</el-button>-->
-                <!--<el-button type="primary"-->
-                           <!--@click="dialogUserBlock = false">-->
-                    <!--Заблокировать-->
-                <!--</el-button>-->
-            <!--</span>-->
-        <!--</el-dialog>-->
-        <!--&lt;!&ndash;Разблокировать сотрудника&ndash;&gt;-->
-        <!--<el-dialog-->
-                <!--title="Разблокировать сотрудника"-->
-                <!--:visible.sync="dialogUserUnblock"-->
-                <!--width="520px"-->
-                <!--top="calc(50vh - 90px)"-->
-                <!--:show-close="false">-->
-            <!--<span>Доступ сотрудника <b>{{userMail}}</b> к конфигурации будет восстановлен.</span>-->
-            <!--<span slot="footer" class="dialog-footer">-->
-                <!--<el-button plain @click="dialogUserBlock = false">Отмена</el-button>-->
-                <!--<el-button type="primary"-->
-                           <!--@click="dialogUserUnblock = false">-->
-                    <!--Разблокировать-->
-                <!--</el-button>-->
-            <!--</span>-->
-        <!--</el-dialog>-->
-        <!--Удалить сотрудника-->
+
         <el-dialog
                 title="Удалить сотрудника?"
-                :visible.sync="dialogUserDelete"
+                :visible.sync="dialog_delete_user"
                 width="520px"
                 top="calc(50vh - 90px)"
-                :show-close="false">
-            <span>Вы действительно хотите удалить сотрудника <b>ФИО</b> из конфигурации? Данное действие невозможно отменить.</span>
+                :close-on-click-modal="!is_loading_action"
+                :close-on-press-escape="!is_loading_action"
+                :show-close="!is_loading_action">
+            <span>Вы действительно хотите удалить сотрудника <b>{{ tmp_user.surname + tmp_user.name }}</b>? Данное действие невозможно отменить.</span>
             <span slot="footer" class="dialog-footer">
-                <el-button plain @click="dialogUserDelete = false">Отмена</el-button>
-                <el-button type="primary" @click="dialogUserDelete = false">Удалить</el-button>
-            </span>
+                    <el-button plain @click="dialog_delete_user = false" :disabled="is_loading_action">Отмена</el-button>
+                    <el-button type="primary" @click="deleteWorkers" :loading="is_loading_action">Удалить</el-button>
+                </span>
         </el-dialog>
-        <!--Массовое удаление-->
         <el-dialog
                 title="Удалить выбранные объекты?"
-                :visible.sync="dialogGroupDelete"
+                :visible.sync="dialog_delete_workers"
                 width="520px"
                 top="calc(50vh - 90px)"
-                :show-close="false">
+                :close-on-click-modal="!is_loading_action"
+                :close-on-press-escape="!is_loading_action"
+                :show-close="!is_loading_action">
             <span>Вы действительно хотите удалить выбранные объекты?
                 Данное действие невозможно отменить.</span>
             <span slot="footer" class="dialog-footer">
-                <el-button plain @click="dialogGroupDelete = false">Отмена</el-button>
-                <el-button type="primary" @click="dialogGroupDelete = false">Удалить</el-button>
-            </span>
+                    <el-button plain @click="dialog_delete_workers = false" :disabled="is_loading_action">Отмена</el-button>
+                    <el-button type="primary" @click="deleteWorkers" :loading="is_loading_action">Удалить</el-button>
+                </span>
         </el-dialog>
-        <!--Массовая блокировка-->
-        <!--<el-dialog-->
-                <!--title="Заблокировать выбранные объекты?"-->
-                <!--:visible.sync="dialogGroupBlock"-->
-                <!--width="520px"-->
-                <!--top="calc(50vh - 90px)"-->
-                <!--:show-close="false">-->
-            <!--<span>Вы действительно хотите ограничить доступ выбранных объектов к конфигурации?-->
-                <!--Сеансы всех активных пользователей будут автоматически завершены.</span>-->
-            <!--<span slot="footer" class="dialog-footer">-->
-                <!--<el-button plain @click="dialogGroupBlock = false">Отмена</el-button>-->
-                <!--<el-button type="primary" @click="dialogGroupBlock = false">Подтвердить</el-button>-->
-            <!--</span>-->
-        <!--</el-dialog>-->
-        <!--Массовая разблокировка-->
-        <!--<el-dialog-->
-                <!--title="Разблокировать выбранные объекты?"-->
-                <!--:visible.sync="dialogGroupUnblock"-->
-                <!--width="520px"-->
-                <!--top="calc(50vh - 90px)"-->
-                <!--:show-close="false">-->
-            <!--<span>Доступ выбранных объектов к конфигурации будет восстановлен.</span>-->
-            <!--<span slot="footer" class="dialog-footer">-->
-                <!--<el-button plain @click="dialogGroupUnblock = false">Отмена</el-button>-->
-                <!--<el-button type="primary" @click="dialogGroupUnblock = false">Подтвердить</el-button>-->
-            <!--</span>-->
-        <!--</el-dialog>-->
-        <!--Новый сотрудник-->
-        <!--<el-dialog-->
-                <!--title="Новый сотрудник"-->
-                <!--:visible.sync="dialogNewWorker"-->
-                <!--width="520px"-->
-                <!--top="calc(50vh - 123px)"-->
-                <!--:show-close="false">-->
-            <!--<div class="dialogNewWorker">-->
-                <!--<p>Приглашение будет отправлено на указанный e-mail.</p>-->
-                <!--<el-form>-->
-                    <!--<el-form-item>-->
-                        <!--<el-input placeholder="Введите e-mail"/>-->
-                    <!--</el-form-item>-->
-                    <!--<el-form-item>-->
-                        <!--<el-select v-model="value2" placeholder="Группа доступа">-->
-                            <!--<el-option value="test">-->
-                                <!--test-->
-                            <!--</el-option>-->
-                        <!--</el-select>-->
-                    <!--</el-form-item>-->
-                <!--</el-form>-->
-            <!--</div>-->
-            <!--<span slot="footer" class="dialog-footer">-->
-                <!--<el-button plain @click="dialogNewWorker = false">Отмена</el-button>-->
-                <!--<el-button type="primary" @click="dialogNewWorker = false">Пригласить</el-button>-->
-            <!--</span>-->
-        <!--</el-dialog>-->
     </div>
 </template>
 
@@ -245,28 +148,21 @@
         data() {
             return {
                 is_loading_action: false,
+                dialog_delete_user: false,
+                dialog_delete_workers: false,
 
-                tmp_index: '',
+                tmp_id: '',
                 tmp_user: '',
 
-
+                selected: [],
 
                 value: '',
                 value2: '',
-                groupActionsValue: '',
-                dialogUserBlock: false,
-                dialogUserUnblock: false,
+
                 dialogUserDelete: false,
-                userBlock: false,
-                userMail: '',
                 dialogGroupDelete: false,
-                dialogGroupBlock: false,
-                dialogGroupUnblock: false,
-                dialogNewWorker: false,
-                groupActions: [
-                    {title: 'Удалить выбранные', value: 'delete'},
-                    {title: 'Заблокировать выбранные', value: 'block'},
-                ],
+
+
                 usersTable: [
                     {
                         mail: 'ali.adams@yahoo.com',
@@ -294,22 +190,60 @@
                         ]
                     },
                 ]
+
             }
         },
         watch: {
-            groupActionsValue(state) {
-                this.clickSelect(state)
+            dialog_delete_user(value){
+                if(!value){
+                    setTimeout(() => {
+                        this.tmp_user = '';
+                    }, 700);
+                }
             }
         },
         methods: {
             ...mapActions({
-                blockEmployee: 'employees/BLOCK_EMPLOYEE'
+                deleteEmployees: 'employees/DELETE_EMPLOYEE'
             }),
-            blockUser(index){
+            deleteWorkers(){
+                this.is_loading_action = true;
 
+                let formed_array = [];
+
+                if(this.dialog_delete_user){
+                    formed_array.push(this.tmp_user.id);
+                }else if(this.dialog_delete_workers){
+                    for(let i in this.selected){
+                        formed_array.push(this.selected[i].id);
+                    }
+                }
+
+                this.deleteEmployees(formed_array).then(res => {
+                    console.log('Delete employees result: ', res);
+
+                    this.$notify.success({
+                        title: 'Ошибка',
+                        message: `${formed_array.length > 1 ? 'Пользователи были удалены' : 'Пользователь был удален'}`,
+                        duration: 1750
+                    });
+                }).catch(error => {
+                    this.$notify.error({
+                        title: 'Ошибка',
+                        message: 'Возникли трудности, повторите операцию позже',
+                        duration: 1750
+                    });
+                }).then(() => {
+                    this.dialog_delete_user = false;
+                    this.dialog_delete_workers = false;
+
+                    this.is_loading_action = false;
+                });
             },
 
-
+            handleSelectionChange(val) {
+                this.selected = val;
+            },
             cellClass({columnIndex}) {
                 if (columnIndex === 5) {
                     return 'cellSelect'
@@ -318,18 +252,7 @@
                     return ''
                 }
             },
-            thisUserMail(userMail) {
-                this.userMail = userMail;
-            },
-            clickSelect(value) {
-                if (value === 'delete') {
-                    this.dialogGroupDelete = true;
-                } else if (value === 'block') {
-                    this.dialogGroupBlock = true;
-                } else if (value === 'unblock') {
-                    this.dialogGroupUnblock = true;
-                }
-            },
+
         },
     }
 </script>

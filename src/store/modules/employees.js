@@ -17,6 +17,18 @@ const store = {
         GET_EMPLOYEE(state, object = null){
             state.current_employee = object;
         },
+        DELETE_EMPLOYEE(state, array){
+            let new_list;
+            for(let i in array){
+                for(let j in state.list){
+                    if(state.list[j].id !== array[i]){
+                        new_list.push(state.list[j]);
+                    }
+                }
+            }
+
+            state.list = new_list;
+        },
     },
     actions: {
         GET_EMPLOYEES_LIST({commit, dispatch, state}){
@@ -94,6 +106,24 @@ const store = {
                         reject(error);
                     }
                     // commit('GET_EMPLOYEE', data);
+                    resolve(response);
+                });
+            });
+        },
+        DELETE_EMPLOYEE({commit, dispatch, state}, array){
+            return new Promise((resolve, reject) => {
+                r.table('employees').filter(
+                    function (doc) {
+                        return r.expr(array)
+                            .contains(doc("id"));
+                    }
+                ).update({deletedAt: r.now()}).run(conn, (error, response) => {
+                    if(error){
+                        console.error('DELETE_EMPLOYEE error: ', error);
+                        reject(error);
+                    }
+                    dispatch('GET_EMPLOYEES_LIST');
+
                     resolve(response);
                 });
             });
