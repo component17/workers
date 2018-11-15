@@ -110,6 +110,18 @@ const store = {
                 });
             });
         },
+        UPDATE_EMPLOYEE_ACCESS({commit, dispatch, state}, {id, data}){
+            return new Promise((resolve, reject) => {
+                r.table('employees').get(id).update(data).run(conn, (error, response) => {
+                    if(error){
+                        console.error('UPDATE_EMPLOYEE error: ', error);
+                        reject(error);
+                    }
+                    // commit('GET_EMPLOYEE', data);
+                    resolve(response);
+                });
+            });
+        },
         DELETE_EMPLOYEE({commit, dispatch, state}, array){
             return new Promise((resolve, reject) => {
                 r.table('employees').filter(

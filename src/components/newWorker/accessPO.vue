@@ -18,7 +18,9 @@
                         </el-option>
                     </el-select>
                 </div>
+                <el-button type="primary" style="margin-left: 15px;" :disabled="model.uid.length < 5 || model.group_id === ''" @click="inviteUser">Пригласить</el-button>
             </el-form-item>
+
 
             <h2>Сторонние приложения <el-checkbox v-model="software_checked">Предоставить</el-checkbox></h2>
             <p>Указанные данные предназначены для авторизации в стороннем ПО (приложения для ТСД, кассы, приложения контроля заказов и др.) Пароль должен
@@ -41,6 +43,8 @@
 </template>
 
 <script>
+    import { mapActions } from 'vuex';
+
     export default {
         props: ['main'],
         data() {
@@ -111,6 +115,51 @@
             }
         },
         methods: {
+            ...mapActions({
+                getEmployee: 'employees/GET_EMPLOYEE',
+                updateEmployeeAccess: 'employees/UPDATE_EMPLOYEE_ACCESS',
+
+            }),
+            inviteUser(){
+                this.$emit('proccessLoading', true);
+
+                upoint.uPassport.user.invite(this.model.uid, this.model.group_id).then(res => {
+                    this.updateEmployeeAccess({
+                        id: this.$route.params.id,
+                        data: {
+                            uid: this.model.uid,
+                            group_id: this.model.group_id
+                        }
+                    }).then(() => {
+                        this.$emit('updateData', {
+                            uid: this.model.uid,
+                            group_id: this.model.group_id
+                        });
+                    });
+                    this.$notify.success({
+                        title: 'Успешно',
+                        message: 'Пользователю было отправленно приглашение в UPoint',
+                        duration: 1750
+                    });
+                }).catch(error => {
+                    console.error(error.response.data.err);
+                    if(error !== undefined){
+                        this.$notify.error({
+                            title: 'Ошибка',
+                            message: `${error.response.data.err}`,
+                            duration: 1750
+                        });
+                    }else{
+                        this.$notify.error({
+                            title: 'Ошибка',
+                            message: 'Возникли трудности, повторите операцию позже',
+                            duration: 1750
+                        });
+                    }
+                }).then(() => {
+                    this.$emit('proccessLoading', false);
+                });
+            },
             generatePassword(){
                 let chars = "1234567890";
                 this.model.password = '';
