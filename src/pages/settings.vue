@@ -82,7 +82,7 @@
                 createPosition: 'positions/CREATE_NEW_POSITION'
             }),
             goBack(){
-                this.$router.go(-1)
+                this.$router.push('/');
             },
             createNewPosition(){
                 this.create_position_dialog = true;
@@ -112,14 +112,6 @@
                     this.create_position_dialog = false;
                 });
             }
-            // getGroups(){
-            //     upoint.uPassport.permissions.getAll().then(res => {
-            //         console.log(res);
-            //
-            //         this.groups = res;
-            //
-            //     })
-            // },
         }
     }
 </script>
