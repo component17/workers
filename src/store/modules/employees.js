@@ -1,3 +1,4 @@
+import Vue from 'vue';
 
 const store = {
     namespaced: true,
@@ -29,6 +30,13 @@ const store = {
 
             state.list = new_list;
         },
+        UPDATE_CURRENT(state, object){
+
+            for(let i in object){
+                console.log(i, object[i]);
+                Vue.set(state.current_employee, i, object[i])
+            }
+        }
     },
     actions: {
         GET_EMPLOYEES_LIST({commit, dispatch, state}){
@@ -59,8 +67,13 @@ const store = {
             return new Promise((resolve, reject) => {
                 r.table('employees').insert({
                     deletedAt: null,
-                    blocked: false,
-                    ...object
+                    uid: '',
+                    email: '',
+                    group_id: '',
+                    login: '',
+                    password: '',
+                    ...object,
+
                 }).run(conn, (error, data) => {
                     if(error){
                         console.error('CREATE_NEW_EMPLOYEE error: ', error);

@@ -10,7 +10,7 @@
             <!--btnBack-->
             <!--@goBack="goBack"-->
             <template slot="header-actions">
-                <el-button plain icon="mdi mdi-delete">Удалить запись</el-button>
+                <el-button plain icon="mdi mdi-delete" @click="deleteEmployee($store.state.employees.current_employee.id)">Удалить запись</el-button>
             </template>
             <div class="newWorker">
                 <!--<div class="auto__search">-->
@@ -78,9 +78,6 @@
             }
         },
         created(){
-            // r.table('employees').update({login: '', password: '', group_id: '', uid: ''}).run(conn, (err, data) => {
-            //     console.log(data);
-            // })
             this.getEmployee(this.$route.params.id).then(res => {
                 this.old_data = {
                     name: res.name,
@@ -94,6 +91,7 @@
                     login: res.login,
                     password: res.password,
                     uid: res.uid,
+                    email: res.email,
                     group_id: res.group_id
                 };
                 if(this.$store.state.positions.list === null){
@@ -107,14 +105,46 @@
                 getEmployee: 'employees/GET_EMPLOYEE',
                 getPositions: 'positions/GET_POSITIONS_LIST',
                 getGroups: 'groups/GET_GROUPS_LIST',
-                updateEmployee: 'employees/UPDATE_EMPLOYEE'
+                updateEmployee: 'employees/UPDATE_EMPLOYEE',
+                removeEmployee: 'employees/DELETE_EMPLOYEE',
             }),
             loadingProccess(value){
                 this.action_in_process = value;
             },
             updateOldData(object){
+                this.$store.commit('employees/UPDATE_CURRENT', object);
                 this.old_data.uid = object.uid;
+                this.old_data.email = object.email;
                 this.old_data.group_id = object.group_id;
+            },
+            deleteEmployee(id){
+                this.action_in_process = true;
+
+                this.removeEmployee([id]).then(res => {
+                    this.$notify.success({
+                        title: 'Успешно',
+                        message: 'Сотрудник был удален',
+                        duration: 1750
+                    });
+                }).catch(error => {
+                    if(error !== undefined){
+                        this.$notify.error({
+                            title: 'Ошибка',
+                            message: `${error.response.data.err}`,
+                            duration: 1750
+                        });
+                    }else{
+                        this.$notify.error({
+                            title: 'Ошибка',
+                            message: `Возникли трудности, повторите операцию позже`,
+                            duration: 1750
+                        });
+                    }
+                }).then(() => {
+                    this.$router.push('/');
+
+                    this.action_in_process = false;
+                })
             },
             save(){
                 this.action_in_process = true;
@@ -152,6 +182,7 @@
                             duration: 1750
                         });
                         this.action_in_process = false;
+                        this.$router.push('/')
                     }else{
                         this.updateEmployee({
                             id: this.$route.params.id,

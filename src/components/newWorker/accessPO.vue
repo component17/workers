@@ -4,14 +4,14 @@
             <h2>Учетная запись UPoint <el-checkbox v-model="account_checked">Создать</el-checkbox></h2>
             <p>Указанные данные предназначены для авторизации сотрудника в UPoint.</p>
 
-            <el-form-item label="E-mail" :required="account_checked" prop="uid" v-if="account_checked">
+            <el-form-item label="E-mail" :required="account_checked" prop="email" v-if="account_checked">
                 <div class="form__mediumInput">
-                    <el-input placeholder="Введите email пользователя" v-model="model.uid" ref="emailInput"/>
+                    <el-input placeholder="Введите email пользователя" v-model="model.email" ref="emailInput" :disabled="model.uid.length > 0"/>
                 </div>
             </el-form-item>
             <el-form-item label="Группа доступа" :required="account_checked" prop="group_id" v-if="account_checked">
                 <div class="form__mediumInput">
-                    <el-select placeholder="Выберите группу" v-model="model.group_id">
+                    <el-select placeholder="Выберите группу" v-model="model.group_id" :disabled="model.uid.length > 0">
                         <el-option v-for="group in $store.state.groups.list"
                             :label="group.name"
                             :value="group.id"
@@ -20,7 +20,7 @@
                         </el-option>
                     </el-select>
                 </div>
-                <el-button type="primary" style="margin-left: 15px;" :disabled="model.uid.length < 5 || model.group_id === ''" @click="inviteUser">Пригласить</el-button>
+                <el-button type="primary" style="margin-left: 15px;" :disabled="model.email.length < 5 || model.group_id === '' || model.uid.length > 0" @click="inviteUser">{{model.uid.length ? 'Приглашение отправленно' : 'Пригласить'}}</el-button>
             </el-form-item>
 
 
@@ -59,6 +59,7 @@
 
                 model: {
                     uid: '',
+                    email: '',
                     group_id: '',
 
                     login: '',
@@ -66,7 +67,7 @@
                 },
 
                 rules: {
-                    uid: [
+                    email: [
                         { required: true, message: 'Email является обязательным полем', trigger: ['change' ,'blur'] },
                         { type: 'email', message: 'Введите корректный email', trigger: 'blur' }
                     ],
@@ -103,6 +104,7 @@
         created(){
             this.model = {
                 uid: this.main.uid ? this.main.uid : '',
+                email: this.main.email ? this.main.email : '',
                 group_id: this.main.group_id ? this.main.group_id : '',
 
                 login: this.main.login ? this.main.login : '',
@@ -125,16 +127,20 @@
             inviteUser(){
                 this.$emit('proccessLoading', true);
 
-                upoint.uPassport.user.invite(this.model.uid, this.model.group_id).then(res => {
+                upoint.uPassport.user.invite(this.model.email, this.model.group_id).then(res => {
+                    let uid = res.uid;
                     this.updateEmployeeAccess({
                         id: this.$route.params.id,
                         data: {
-                            uid: this.model.uid,
+                            uid: res.uid,
+                            email: this.model.email,
                             group_id: this.model.group_id
                         }
                     }).then(() => {
+                        this.model.uid = uid;
                         this.$emit('updateData', {
-                            uid: this.model.uid,
+                            uid: uid,
+                            email: this.model.email,
                             group_id: this.model.group_id
                         });
                     });
@@ -144,7 +150,7 @@
                         duration: 1750
                     });
                 }).catch(error => {
-                    console.error(error.response.data.err);
+                    console.error(error)
                     if(error !== undefined){
                         this.$notify.error({
                             title: 'Ошибка',
