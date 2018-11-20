@@ -1,3 +1,4 @@
+import Vue from 'vue'
 
 const store = {
     namespaced: true,
@@ -11,6 +12,13 @@ const store = {
         },
         CREATE_NEW_POSITION(state, object){
             state.list.push(object);
+        },
+        UPDATE_POSITION(state, object){
+            // Vue.set(state.list[object.index], 'name', object.name);
+            state.list[object.index].name = name;
+        },
+        REMOVE_POSITION(state, id){
+            Vue.set(state.list[object.index], 'name', object.name);
         }
     },
     actions: {
@@ -48,6 +56,38 @@ const store = {
                         deletedAt: null
                     });
                     resolve(data);
+                });
+            });
+        },
+        UPDATE_POSITION({commit, dispatch, state}, {index, name}){
+            return new Promise((resolve, reject) => {
+                r.table('employees_positions').get(state.list[index].id).update({
+                    name: name,
+                }).run(conn, (error, data) => {
+                    if(error){
+                        console.error('UPDATE_POSITION error: ', error);
+                        reject(error);
+                    }
+                    commit('UPDATE_POSITION', {index, name});
+                    resolve(data);
+                });
+            });
+        },
+        REMOVE_POSITION({commit, dispatch, state}, array){
+            return new Promise((resolve, reject) => {
+                r.table('employees_positions').filter(
+                    function (doc) {
+                        return r.expr(array)
+                            .contains(doc("id"));
+                    }
+                ).update({deletedAt: r.now()}).run(conn, (error, response) => {
+                    if(error){
+                        console.error('REMOVE_POSITION error: ', error);
+                        reject(error);
+                    }
+                    dispatch('GET_POSITIONS_LIST');
+
+                    resolve(response);
                 });
             });
         }
