@@ -65,12 +65,12 @@
                                 </div>
                                 <div class="formMakerContent__item-checkbox" v-if="item.type == 'checkbox'">
                                     <el-checkbox-group v-model="item.value">
-                                        <el-checkbox v-for="option in item.options" :label="option.label" :value="option.value"/>
+                                        <el-checkbox v-for="option in item.options" :label="option.label" :value="option.value" :key="option.value"/>
                                     </el-checkbox-group>
                                 </div>
                                 <div class="formMakerContent__item-radio" v-if="item.type == 'radio'">
                                     <el-radio-group v-model="item.value">
-                                        <el-radio v-for="option in item.options" :label="option.label" :value="option.value"/>
+                                        <el-radio v-for="option in item.options" :label="option.label" :value="option.value" :key="option.value"/>
                                     </el-radio-group>
                                 </div>
                                 <div class="formMakerContent__item-date" v-if="item.type == 'date'">

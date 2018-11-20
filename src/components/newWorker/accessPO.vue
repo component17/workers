@@ -13,8 +13,10 @@
                 <div class="form__mediumInput">
                     <el-select placeholder="Выберите группу" v-model="model.group_id">
                         <el-option v-for="group in $store.state.groups.list"
-                                :label="group.name"
-                                :value="group.id">
+                            :label="group.name"
+                            :value="group.id"
+                            :key="group.id"
+                        >
                         </el-option>
                     </el-select>
                 </div>
