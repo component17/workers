@@ -25,9 +25,9 @@
                         sortable
                         :resizable="false">
                     <template slot-scope="scope">
-                        <!--<router-link :to="scope.row.link" class="workersList__table-name" :title="scope.row.name">-->
+                        <router-link :to="`/employee/info/${scope.row.id}`" class="workersList__table-name" :title="scope.row.name">
                             {{ scope.row.surname }} {{ scope.row.name }}{{ scope.row.patronymic.length ? ' ' + scope.row.patronymic : ''}}
-                        <!--</router-link>-->
+                        </router-link>
                     </template>
                 </el-table-column>
                 <el-table-column
@@ -69,10 +69,6 @@
                         :resizable="false">
                     <template slot-scope="scope">
                         <span>{{ scope.row.position.name }}</span>
-                        <!--<el-select v-model="scope.row.position" placeholder="Должность" :disabled="true">-->
-                            <!--<el-option v-for="(position, index) in $store.state.positions.list" :value="position.id" :label="position.name" :key="index">-->
-                            <!--</el-option>-->
-                        <!--</el-select>-->
                     </template>
                 </el-table-column>
                 <el-table-column
