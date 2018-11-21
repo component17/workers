@@ -5,7 +5,7 @@
                 <!--<el-input placeholder="Найти должность"></el-input>-->
             </div>
             <div class="workersPermissions__head-delete">
-                <el-button plain @click="delete_several_position_dialog = true"><i class="mdi mdi-delete"></i>Удалить выбранные</el-button>
+                <el-button plain @click="delete_several_position_dialog = true" :disabled="!selected.length"><i class="mdi mdi-delete"></i>Удалить выбранные</el-button>
             </div>
         </div>
         <div class="workersPermissions__table">

@@ -1,7 +1,7 @@
 <template>
     <div class="newWorkerAccessPO">
         <el-form label-width="200px" label-position="left" ref="accessEmployee" :model="model" :disabled="is_loading_action" :rules="rules">
-            <h2>Учетная запись UPoint <el-checkbox v-model="account_checked">Создать</el-checkbox></h2>
+            <h2>Учетная запись UPoint <el-checkbox v-model="account_checked" v-if="!showStatus">Создать</el-checkbox></h2>
             <p>Указанные данные предназначены для авторизации сотрудника в UPoint.</p>
 
             <el-form-item label="E-mail" :required="account_checked" prop="email" v-if="account_checked">
@@ -20,23 +20,23 @@
                         </el-option>
                     </el-select>
                 </div>
-                <el-button type="primary" style="margin-left: 15px;" :disabled="model.email.length < 5 || model.group_id === '' || model.uid.length > 0" @click="inviteUser">{{model.uid.length ? 'Приглашение отправленно' : 'Пригласить'}}</el-button>
+                <el-button type="primary" style="margin-left: 15px;" :disabled="model.email.length < 5 || model.group_id === '' || model.uid.length > 0" @click="inviteUser" v-if="!showStatus">{{model.uid.length ? 'Приглашение отправленно' : 'Пригласить'}}</el-button>
             </el-form-item>
 
 
-            <h2>Сторонние приложения <el-checkbox v-model="software_checked">Предоставить</el-checkbox></h2>
+            <h2>Сторонние приложения <el-checkbox v-model="software_checked" v-if="!showApp">Предоставить</el-checkbox></h2>
             <p>Указанные данные предназначены для авторизации в стороннем ПО (приложения для ТСД, кассы, приложения контроля заказов и др.) Пароль должен
                 содержать не менее 4 символов.</p>
 
             <el-form-item label="Логин" :required="software_checked" prop="login" v-if="software_checked">
                 <div class="form__mediumInput">
-                    <el-input placeholder="Укажите логин пользователя" v-model="model.login" ref="loginInput"/>
+                    <el-input placeholder="Укажите логин пользователя" v-model="model.login" ref="loginInput" :disabled="disabledEdit"/>
                 </div>
             </el-form-item>
             <el-form-item label="Пароль" :required="software_checked" prop="password" v-if="software_checked">
                 <div class="form__mediumInput">
-                    <el-input placeholder="Укажите пароль" v-model="model.password">
-                        <el-button slot="append" @click="generatePassword">Сгенерировать</el-button>
+                    <el-input placeholder="Укажите пароль" v-model="model.password" :disabled="disabledEdit">
+                        <el-button slot="append" @click="generatePassword" :disabled="disabledEdit">Сгенерировать</el-button>
                     </el-input>
                 </div>
             </el-form-item>
@@ -48,7 +48,24 @@
     import { mapActions } from 'vuex';
 
     export default {
-        props: ['main'],
+        props: {
+            main: {
+                type: Object,
+                default: function(){ return {} }
+            },
+            showStatus: {
+                type: Boolean,
+                default: false
+            },
+            showApp: {
+                type: Boolean,
+                default: false
+            },
+            disabledEdit: {
+                type: Boolean,
+                default: false
+            }
+        },
         data() {
             return {
                 is_loading_action: false,
@@ -111,10 +128,21 @@
                 password: this.main.password ? this.main.password : ''
             };
 
+            for(let i in this.$store.state.groups.list){
+                if(this.$store.state.groups.list[i].id !== this.model.group_id) this.model.group_id = '';
+            }
+
+            if(this.model.uid.length){
+                this.account_checked = true;
+            }
             if(this.model.login.length){
                 this.software_checked = true;
             }
-            if(this.model.uid.length){
+
+            if(this.showApp){
+                this.software_checked = true;
+            }
+            if(this.showStatus){
                 this.account_checked = true;
             }
         },

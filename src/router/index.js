@@ -11,6 +11,7 @@ import settings from '@/pages/settings'
 
 import create_employee from '@/pages/employee/create'
 import edit_employee from '@/pages/employee/edit'
+import info_employee from '@/pages/employee/info'
 
 import create_group from '@/pages/group/create'
 import edit_group from '@/pages/group/edit'
@@ -46,6 +47,10 @@ export default new Router({
             path: '/employee/edit/:id',
             name: 'edit_employee',
             component: edit_employee
+        }, {
+            path: '/employee/info/:id',
+            name: 'info_employee',
+            component: info_employee
         }, {
             path: '/error',
             name: 'error',
