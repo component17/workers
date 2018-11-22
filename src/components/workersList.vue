@@ -2,7 +2,7 @@
     <div class="workersList">
         <div class="workersList__head">
             <div class="workersList__head-search">
-                <el-input placeholder="Найти сотрудника" :disabled="true"/>
+                <el-input placeholder="Найти сотрудника" v-model="search" @input="searchEmployee"/>
             </div>
             <div class="workersList__head-actions">
                 <el-button icon="mdi mdi-delete" :disabled="!selected.length" @click="dialog_delete_workers = true">Удалить выбранные</el-button>
@@ -14,6 +14,7 @@
                     border
                     style="width: 100%"
                     @selection-change="handleSelectionChange"
+                    @filter-change="showFilter"
                     :cell-class-name="cellClass">
                 <el-table-column
                         type="selection"
@@ -30,9 +31,13 @@
                         </router-link>
                     </template>
                 </el-table-column>
+                <!--:filter-method="filterGender"-->
                 <el-table-column
                         label="Пол"
-                        :filters="[{text: 'test', value: 'test'}]"
+                        :filters="[{text: 'Мужской', value: 'MALE'}, {text: 'Женский', value: 'FEMALE'}]"
+                        :filter-multiple="false"
+
+
                         :resizable="false"
                         width="80"
                         prop="gender"
@@ -74,7 +79,6 @@
                 <el-table-column
                         v-show="false"
                         label="Теги"
-                        :filters="[{text: 'test', value: 'test'}]"
                         :resizable="false">
                     <template slot-scope="scope" v-show="false">
                         <div class="workersList__table-tags">
@@ -138,9 +142,23 @@
 
 <script>
     import { mapActions } from 'vuex'
+    import _ from 'lodash'
 
     export default {
-        props: ['list'],
+        props: {
+            list: {
+                type: Array,
+                default: function(){ return [] }
+            },
+            size: {
+                type: Number,
+                default: 10
+            },
+            skip: {
+                type: Number,
+                default: 1
+            }
+        },
         data() {
             return {
                 is_loading_action: false,
@@ -152,40 +170,50 @@
 
                 selected: [],
 
-                value: '',
-                value2: '',
+                search: '',
+                gender: '',
+                limit: 0,
+                page: 0,
 
-                dialogUserDelete: false,
-                dialogGroupDelete: false,
+                order: {
+                    name: 'fio',
+                    sort: 'ASC'
+                }
+
+                // value: '',
+                // value2: '',
+                //
+                // dialogUserDelete: false,
+                // dialogGroupDelete: false,
 
 
-                usersTable: [
-                    {
-                        mail: 'ali.adams@yahoo.com',
-                        name: 'Константинопольский Константин Александрович',
-                        phone: '+7 831-090-2171',
-                        link: '/personCard',
-                        gender: 'Человек',
-                        city: 'Нижний Новгород',
-                        tags: [
-                            {name: 'Продукты питания'},
-                            {name: 'Продукты питания'},
-                            {name: 'Одежда'},
-                        ]
-                    },
-                    {
-                        mail: 'valentin.runolfsson@erdman.net',
-                        name: 'Алексеева Светлана Николаевна',
-                        phone: '909-828-7928',
-                        link: '/personCard',
-                        gender: 'Почти человек',
-                        city: 'Воронеж',
-                        tags: [
-                            {name: 'Электроника'},
-                            {name: 'Прочее'},
-                        ]
-                    },
-                ]
+                // usersTable: [
+                //     {
+                //         mail: 'ali.adams@yahoo.com',
+                //         name: 'Константинопольский Константин Александрович',
+                //         phone: '+7 831-090-2171',
+                //         link: '/personCard',
+                //         gender: 'Человек',
+                //         city: 'Нижний Новгород',
+                //         tags: [
+                //             {name: 'Продукты питания'},
+                //             {name: 'Продукты питания'},
+                //             {name: 'Одежда'},
+                //         ]
+                //     },
+                //     {
+                //         mail: 'valentin.runolfsson@erdman.net',
+                //         name: 'Алексеева Светлана Николаевна',
+                //         phone: '909-828-7928',
+                //         link: '/personCard',
+                //         gender: 'Почти человек',
+                //         city: 'Воронеж',
+                //         tags: [
+                //             {name: 'Электроника'},
+                //             {name: 'Прочее'},
+                //         ]
+                //     },
+                // ]
 
             }
         },
@@ -198,10 +226,45 @@
                 }
             }
         },
+        created(){
+            this.limit = this.size;
+            this.page = this.skip;
+        },
         methods: {
             ...mapActions({
-                deleteEmployees: 'employees/DELETE_EMPLOYEE'
+                deleteEmployees: 'employees/DELETE_EMPLOYEE',
+                getEmployees: 'employees/GET_EMPLOYEES_LIST',
             }),
+            getSpecificData(){
+                console.log(' -== Before send data ==-', '\nquery: ', this.search, '\ngender: ', this.gender, '\nlimit: ', this.limit, '\nskip: ', this.page);
+                this.getEmployees({
+                    query: this.search,
+                    gender: this.gender,
+                    limit: this.limit,
+                    page: this.page,
+                }).then(result => {
+                    console.log('Get new employees list: ', result);
+                });
+            },
+            showFilter: _.debounce(
+                function(data){
+                    let value = data['el-table_1_column_3'];
+                    if(value.length){
+                        this.gender = value[0];
+                    }else{
+                        this.gender = '';
+                    }
+                    this.getSpecificData();
+                }, 300
+            ),
+            searchEmployee: _.debounce(
+                function(query){
+                    this.getSpecificData();
+                    // this.getEmployees(query).then(result => {
+                    //     console.log('Get new employees list: ', result);
+                    // });
+                }, 1000
+            ),
             deleteWorkers(){
                 this.is_loading_action = true;
 

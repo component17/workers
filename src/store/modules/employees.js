@@ -39,10 +39,82 @@ const store = {
         }
     },
     actions: {
-        GET_EMPLOYEES_LIST({commit, dispatch, state}){
-            return new Promise((resolve, reject) => {
+        GET_EMPLOYEES_LIST({commit, dispatch, state}, obj){
+            let count = 0;
+            if(obj === undefined){
+                obj = {
+                    query: '',
+                    gender: '',
+                    limit: 10,
+                    page: 0,
+                }
+            }
+            for(let i in obj){
+                if(obj[i] === undefined){
+                    switch (i){
+                        case 'query':
+                            obj.query = '';
+                            break;
+                        case 'gender':
+                            obj.gender = '';
+                            break;
+                        case 'limit':
+                            obj.limit = 10;
+                            break;
+                        case 'page':
+                            obj.page = 1;
+                            break;
+                    }
+                }
+            }
+            return new Promise(async (resolve, reject) => {
                 try{
-                    r.table('employees').orderBy('name').filter({deletedAt: null}).merge(row => { return {'position': r.table('employees_positions').get(row('position'))} })
+                    await r.table('employees').filter((user) => {
+                        if(obj.query.length && obj.gender.length){
+                            return (user('surname').match(`${obj.query}`)
+                                .or(user('name').match(`${obj.query}`)))
+                                .and(user('gender').eq(obj.gender))
+                                .and(user('deletedAt').eq(null))
+                        }
+                        if(obj.query.length){
+                            return (user('surname').match(`${obj.query}`)
+                                .or(user('name').match(`${obj.query}`)))
+                                .and(user('deletedAt').eq(null))
+                        }
+                        if(obj.gender.length){
+                            return user('gender').eq(`${obj.gender}`)
+                                .and(user('deletedAt').eq(null))
+                        }
+                        return user('deletedAt').eq(null);
+                    }).count().run(conn, (err, data) => {
+                        count = data;
+                        }
+                    );
+
+                    await r.table('employees').orderBy('name').filter((user) => {
+                        if(obj.query.length && obj.gender.length){
+                            return (user('surname').match(`${obj.query}`)
+                                .or(user('name').match(`${obj.query}`)))
+                                .and(user('gender').eq(obj.gender))
+                                .and(user('deletedAt').eq(null))
+                        }
+                        if(obj.query.length){
+                            return (user('surname').match(`${obj.query}`)
+                                .or(user('name').match(`${obj.query}`)))
+                                .and(user('deletedAt').eq(null))
+                        }
+                        if(obj.gender.length){
+                            return user('gender').eq(`${obj.gender}`)
+                                .and(user('deletedAt').eq(null))
+                        }
+                        return user('deletedAt').eq(null);
+                    }).merge(
+                        row => {
+                            return {
+                                'position': r.table('employees_positions').get(row('position')),
+                            }
+                        }
+                    ).skip((obj.page * obj.limit) - obj.limit).limit(obj.limit)
                     .run(conn, (err, cursor) => {
                         if(err){
                             console.error('Error 1: ', err);
@@ -54,8 +126,8 @@ const store = {
                                 reject(err)
                             }
                             commit('GET_EMPLOYEE');
-                            commit('GET_EMPLOYEES_LIST', data);
-                            resolve(data);
+                            commit('GET_EMPLOYEES_LIST', {items: data, count: count});
+                            resolve({items: data, count: count});
                         })
                     });
                 }catch(error){
