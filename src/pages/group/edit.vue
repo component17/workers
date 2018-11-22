@@ -5,7 +5,7 @@
             showFooter
     >
         <template slot="header-actions">
-            <el-button plain @click="delete_dialog = true" icon="mdi mdi-delete">Удалить группу</el-button>
+            <!--<el-button plain @click="delete_dialog = true" icon="mdi mdi-delete">Удалить группу</el-button>-->
         </template>
         <div class="editPermission" :loading="!$store.state.groups.current_group_permissions">
             <div class="auto__search">

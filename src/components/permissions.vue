@@ -5,7 +5,7 @@
                 <!--<el-input placeholder="Найти группу прав"></el-input>-->
             </div>
             <div class="workersPermissions__head-delete">
-                <el-button plain @click="delete_several_groups_dialog = true" :disabled="!selected.length"><i class="mdi mdi-delete"></i>Удалить выбранные</el-button>
+                <!--<el-button plain @click="delete_several_groups_dialog = true" :disabled="!selected.length"><i class="mdi mdi-delete"></i>Удалить выбранные</el-button>-->
             </div>
         </div>
         <div class="workersPermissions__table">
@@ -16,7 +16,7 @@
                         border
                         @selection-change="handleSelectionChange"
                         style="width: 100%">
-                    <el-table-column type="selection" width="35"></el-table-column>
+                    <!--<el-table-column type="selection" width="35"></el-table-column>-->
                     <el-table-column
                             label="Группа прав"
                             sortable>
@@ -30,9 +30,9 @@
                             align="center">
                         <template slot-scope="scope">
                             <el-button type="text" :disabled="scope.row.isAdmin" @click="$router.push(`/group/edit/${scope.row.id}`)"><i class="mdi mdi-pencil"></i></el-button>
-                            <el-button type="text"
-                                       @click="tmp_id = scope.row.id;tmp_name = scope.row.name;delete_one_group_dialog = true"
-                                       :disabled="scope.row.isAdmin"><i class="mdi mdi-delete"></i></el-button>
+                            <!--<el-button type="text"-->
+                                       <!--@click="tmp_id = scope.row.id;tmp_name = scope.row.name;delete_one_group_dialog = true"-->
+                                       <!--:disabled="scope.row.isAdmin"><i class="mdi mdi-delete"></i></el-button>-->
                         </template>
                     </el-table-column>
                 </el-table>

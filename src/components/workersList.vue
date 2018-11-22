@@ -2,7 +2,7 @@
     <div class="workersList">
         <div class="workersList__head">
             <div class="workersList__head-search">
-                <el-input placeholder="Найти сотрудника" :disabled="true"/>
+                <el-input placeholder="Найти сотрудника" v-model="search" @input="searchEmployee"/>
             </div>
             <div class="workersList__head-actions">
                 <el-button icon="mdi mdi-delete" :disabled="!selected.length" @click="dialog_delete_workers = true">Удалить выбранные</el-button>
@@ -14,6 +14,7 @@
                     border
                     style="width: 100%"
                     @selection-change="handleSelectionChange"
+                    @filter-change="showFilter"
                     :cell-class-name="cellClass">
                 <el-table-column
                         type="selection"
@@ -30,9 +31,13 @@
                         </router-link>
                     </template>
                 </el-table-column>
+                <!--:filter-method="filterGender"-->
                 <el-table-column
                         label="Пол"
-                        :filters="[{text: 'test', value: 'test'}]"
+                        :filters="[{text: 'Мужской', value: 'MALE'}, {text: 'Женский', value: 'FEMALE'}]"
+                        :filter-multiple="false"
+
+
                         :resizable="false"
                         width="80"
                         prop="gender"
@@ -138,9 +143,23 @@
 
 <script>
     import { mapActions } from 'vuex'
+    import _ from 'lodash'
 
     export default {
-        props: ['list'],
+        props: {
+            list: {
+                type: Array,
+                default: function(){ return [] }
+            },
+            limit: {
+                type: Number,
+                default: 1
+            },
+            page: {
+                type: Number,
+                default: 0
+            }
+        },
         data() {
             return {
                 is_loading_action: false,
@@ -151,6 +170,11 @@
                 tmp_user: '',
 
                 selected: [],
+
+                search: '',
+                gender: '',
+                size: 0,
+                skip: 0,
 
                 value: '',
                 value2: '',
@@ -198,10 +222,45 @@
                 }
             }
         },
+        created(){
+            this.size = this.limit;
+            this.skip = this.page;
+        },
         methods: {
             ...mapActions({
-                deleteEmployees: 'employees/DELETE_EMPLOYEE'
+                deleteEmployees: 'employees/DELETE_EMPLOYEE',
+                getEmployees: 'employees/GET_EMPLOYEES_LIST',
             }),
+            getSpecificData(){
+                console.log(' -== Before send data ==-', '\nquery: ', this.search, '\ngender: ', this.gender, '\nlimit: ', this.size, '\nskip: ', this.skip);
+                this.getEmployees({
+                    query: this.search,
+                    gender: this.gender,
+                    limit: this.size,
+                    skip: this.skip,
+                }).then(result => {
+                    console.log('Get new employees list: ', result);
+                });
+            },
+            showFilter: _.debounce(
+                function(data){
+                    let value = data['el-table_1_column_3'];
+                    if(value.length){
+                        this.gender = value[0];
+                    }else{
+                        this.gender = '';
+                    }
+                    this.getSpecificData();
+                }, 300
+            ),
+            searchEmployee: _.debounce(
+                function(query){
+                    this.getSpecificData();
+                    // this.getEmployees(query).then(result => {
+                    //     console.log('Get new employees list: ', result);
+                    // });
+                }, 1000
+            ),
             deleteWorkers(){
                 this.is_loading_action = true;
 

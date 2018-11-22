@@ -6,7 +6,7 @@ import router from './router'
 import store from './store/index'
 
 Vue.prototype.$isDeveloper = process.env.NODE_ENV === 'development';
-Vue.prototype.$hash = require('object-hash')
+Vue.prototype.$hash = require('object-hash');
 
 import uPoint from 'upoint-vue-ui';
 import locale from 'upoint-vue-ui/locale/lang/ru-RU'
@@ -26,9 +26,17 @@ import newWorkerAccessPO from './components/newWorker/accessPO'
 import newWorkerContacts from './components/newWorker/contacts'
 import newWorkerPassport from './components/newWorker/passport'
 
+import pagination from './components/global/pagination'
 
 import workTable from './components/workTable'
 
+import VueLodash from 'vue-lodash'
+
+const options = { name: '_' } // customize the way you want to call it
+
+Vue.use(VueLodash, options) // options is optional
+
+Vue.component('pagination', pagination);
 Vue.component('draggable', draggable);
 
 Vue.component('workersList', workersList);

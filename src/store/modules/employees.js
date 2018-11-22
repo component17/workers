@@ -39,10 +39,57 @@ const store = {
         }
     },
     actions: {
-        GET_EMPLOYEES_LIST({commit, dispatch, state}){
+        GET_EMPLOYEES_LIST({commit, dispatch, state}, obj){
+            if(obj === undefined){
+                obj = {
+                    query: '',
+                    gender: '',
+                    limit: 1,
+                    skip: 0,
+                }
+            }
+            for(let i in obj){
+                if(obj[i] === undefined){
+                    switch (i){
+                        case 'query':
+                            obj.query = '';
+                            break;
+                        case 'gender':
+                            obj.gender = '';
+                            break;
+                        case 'limit':
+                            obj.limit = 1;
+                            break;
+                        case 'skip':
+                            obj.skip = 0;
+                            break;
+                    }
+                }
+            }
+
+
+            // console.log('Got this params', '\nquery: ', obj.query, '\ngender: ', obj.gender, '\nlimit: ', obj.limit, '\nskip: ', obj.skip);
+
             return new Promise((resolve, reject) => {
                 try{
-                    r.table('employees').orderBy('name').filter({deletedAt: null}).merge(row => { return {'position': r.table('employees_positions').get(row('position'))} })
+                    r.table('employees').orderBy('name').filter((user) => {
+                        if(obj.query.length && obj.gender.length){
+                            return (user('surname').match(`${obj.query}`)
+                                .or(user('name').match(`${obj.query}`)))
+                                .and(user('gender').eq(obj.gender))
+                                .and(user('deletedAt').eq(null))
+                        }
+                        if(obj.query.length){
+                            return (user('surname').match(`${obj.query}`)
+                                .or(user('name').match(`${obj.query}`)))
+                                .and(user('deletedAt').eq(null))
+                        }
+                        if(obj.gender.length){
+                            return user('gender').eq(`${obj.gender}`)
+                                .and(user('deletedAt').eq(null))
+                        }
+                        return user('deletedAt').eq(null);
+                    }).merge(row => { return {'position': r.table('employees_positions').get(row('position'))} })
                     .run(conn, (err, cursor) => {
                         if(err){
                             console.error('Error 1: ', err);
