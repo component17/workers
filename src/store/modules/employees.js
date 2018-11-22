@@ -40,12 +40,13 @@ const store = {
     },
     actions: {
         GET_EMPLOYEES_LIST({commit, dispatch, state}, obj){
+            let count = 0;
             if(obj === undefined){
                 obj = {
                     query: '',
                     gender: '',
-                    limit: 1,
-                    skip: 0,
+                    limit: 10,
+                    page: 0,
                 }
             }
             for(let i in obj){
@@ -58,21 +59,17 @@ const store = {
                             obj.gender = '';
                             break;
                         case 'limit':
-                            obj.limit = 1;
+                            obj.limit = 10;
                             break;
-                        case 'skip':
-                            obj.skip = 0;
+                        case 'page':
+                            obj.page = 1;
                             break;
                     }
                 }
             }
-
-
-            // console.log('Got this params', '\nquery: ', obj.query, '\ngender: ', obj.gender, '\nlimit: ', obj.limit, '\nskip: ', obj.skip);
-
-            return new Promise((resolve, reject) => {
+            return new Promise(async (resolve, reject) => {
                 try{
-                    r.table('employees').orderBy('name').filter((user) => {
+                    await r.table('employees').filter((user) => {
                         if(obj.query.length && obj.gender.length){
                             return (user('surname').match(`${obj.query}`)
                                 .or(user('name').match(`${obj.query}`)))
@@ -89,7 +86,35 @@ const store = {
                                 .and(user('deletedAt').eq(null))
                         }
                         return user('deletedAt').eq(null);
-                    }).merge(row => { return {'position': r.table('employees_positions').get(row('position'))} })
+                    }).count().run(conn, (err, data) => {
+                        count = data;
+                        }
+                    );
+
+                    await r.table('employees').orderBy('name').filter((user) => {
+                        if(obj.query.length && obj.gender.length){
+                            return (user('surname').match(`${obj.query}`)
+                                .or(user('name').match(`${obj.query}`)))
+                                .and(user('gender').eq(obj.gender))
+                                .and(user('deletedAt').eq(null))
+                        }
+                        if(obj.query.length){
+                            return (user('surname').match(`${obj.query}`)
+                                .or(user('name').match(`${obj.query}`)))
+                                .and(user('deletedAt').eq(null))
+                        }
+                        if(obj.gender.length){
+                            return user('gender').eq(`${obj.gender}`)
+                                .and(user('deletedAt').eq(null))
+                        }
+                        return user('deletedAt').eq(null);
+                    }).merge(
+                        row => {
+                            return {
+                                'position': r.table('employees_positions').get(row('position')),
+                            }
+                        }
+                    ).skip((obj.page * obj.limit) - obj.limit).limit(obj.limit)
                     .run(conn, (err, cursor) => {
                         if(err){
                             console.error('Error 1: ', err);
@@ -101,8 +126,8 @@ const store = {
                                 reject(err)
                             }
                             commit('GET_EMPLOYEE');
-                            commit('GET_EMPLOYEES_LIST', data);
-                            resolve(data);
+                            commit('GET_EMPLOYEES_LIST', {items: data, count: count});
+                            resolve({items: data, count: count});
                         })
                     });
                 }catch(error){

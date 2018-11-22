@@ -14,16 +14,16 @@
                         <el-button plain @click="$router.push('/settings')" icon="mdi mdi-settings">Настройки</el-button>
                     </template>
 
-                    <workersList :list="$store.state.employees.list" :limit="limit" :page="page" ref="workList"/>
+                    <workersList :list="$store.state.employees.list.items" :size="limit" :skip="page" ref="workList"/>
 
                     <template slot="footer">
-                        <!--<pagination-->
-                            <!--@changeCurrentPage="changeCurrentPage"-->
-                            <!--@changeSize="changeSize"-->
-                            <!--:limit="limit"-->
-                            <!--:page="page"-->
-                            <!--:total="400"-->
-                        <!--&gt;</pagination>-->
+                        <pagination
+                            @changeCurrentPage="changeCurrentPage"
+                            @changeSize="changeSize"
+                            :limit="limit"
+                            :page="page"
+                            :total="$store.state.employees.list.count"
+                        ></pagination>
 
                     </template>
 
@@ -62,14 +62,17 @@
                 getPositions: 'positions/GET_POSITIONS_LIST',
             }),
             changeCurrentPage(page){
-                console.log(page);
                 this.page = page;
-                // console.log(this.$refs.workList)
+                this.$refs.workList.page = page;
                 this.$refs.workList.getSpecificData();
             },
             changeSize(limit){
-                console.log(limit);
                 this.limit = limit;
+                this.$refs.workList.limit = limit;
+
+                this.page = 1;
+                this.$refs.workList.page = 1;
+
                 this.$refs.workList.getSpecificData();
             },
             getWorkerList(){

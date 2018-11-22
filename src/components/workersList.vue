@@ -79,7 +79,6 @@
                 <el-table-column
                         v-show="false"
                         label="Теги"
-                        :filters="[{text: 'test', value: 'test'}]"
                         :resizable="false">
                     <template slot-scope="scope" v-show="false">
                         <div class="workersList__table-tags">
@@ -151,13 +150,13 @@
                 type: Array,
                 default: function(){ return [] }
             },
-            limit: {
+            size: {
+                type: Number,
+                default: 10
+            },
+            skip: {
                 type: Number,
                 default: 1
-            },
-            page: {
-                type: Number,
-                default: 0
             }
         },
         data() {
@@ -173,43 +172,48 @@
 
                 search: '',
                 gender: '',
-                size: 0,
-                skip: 0,
+                limit: 0,
+                page: 0,
 
-                value: '',
-                value2: '',
+                order: {
+                    name: 'fio',
+                    sort: 'ASC'
+                }
 
-                dialogUserDelete: false,
-                dialogGroupDelete: false,
+                // value: '',
+                // value2: '',
+                //
+                // dialogUserDelete: false,
+                // dialogGroupDelete: false,
 
 
-                usersTable: [
-                    {
-                        mail: 'ali.adams@yahoo.com',
-                        name: 'Константинопольский Константин Александрович',
-                        phone: '+7 831-090-2171',
-                        link: '/personCard',
-                        gender: 'Человек',
-                        city: 'Нижний Новгород',
-                        tags: [
-                            {name: 'Продукты питания'},
-                            {name: 'Продукты питания'},
-                            {name: 'Одежда'},
-                        ]
-                    },
-                    {
-                        mail: 'valentin.runolfsson@erdman.net',
-                        name: 'Алексеева Светлана Николаевна',
-                        phone: '909-828-7928',
-                        link: '/personCard',
-                        gender: 'Почти человек',
-                        city: 'Воронеж',
-                        tags: [
-                            {name: 'Электроника'},
-                            {name: 'Прочее'},
-                        ]
-                    },
-                ]
+                // usersTable: [
+                //     {
+                //         mail: 'ali.adams@yahoo.com',
+                //         name: 'Константинопольский Константин Александрович',
+                //         phone: '+7 831-090-2171',
+                //         link: '/personCard',
+                //         gender: 'Человек',
+                //         city: 'Нижний Новгород',
+                //         tags: [
+                //             {name: 'Продукты питания'},
+                //             {name: 'Продукты питания'},
+                //             {name: 'Одежда'},
+                //         ]
+                //     },
+                //     {
+                //         mail: 'valentin.runolfsson@erdman.net',
+                //         name: 'Алексеева Светлана Николаевна',
+                //         phone: '909-828-7928',
+                //         link: '/personCard',
+                //         gender: 'Почти человек',
+                //         city: 'Воронеж',
+                //         tags: [
+                //             {name: 'Электроника'},
+                //             {name: 'Прочее'},
+                //         ]
+                //     },
+                // ]
 
             }
         },
@@ -223,8 +227,8 @@
             }
         },
         created(){
-            this.size = this.limit;
-            this.skip = this.page;
+            this.limit = this.size;
+            this.page = this.skip;
         },
         methods: {
             ...mapActions({
@@ -232,12 +236,12 @@
                 getEmployees: 'employees/GET_EMPLOYEES_LIST',
             }),
             getSpecificData(){
-                console.log(' -== Before send data ==-', '\nquery: ', this.search, '\ngender: ', this.gender, '\nlimit: ', this.size, '\nskip: ', this.skip);
+                console.log(' -== Before send data ==-', '\nquery: ', this.search, '\ngender: ', this.gender, '\nlimit: ', this.limit, '\nskip: ', this.page);
                 this.getEmployees({
                     query: this.search,
                     gender: this.gender,
-                    limit: this.size,
-                    skip: this.skip,
+                    limit: this.limit,
+                    page: this.page,
                 }).then(result => {
                     console.log('Get new employees list: ', result);
                 });

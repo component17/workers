@@ -13,7 +13,6 @@
         <!--</el-pagination>-->
         <el-pagination
                 small
-                v-if="total > 10"
                 :page-sizes="[10, 20, 50, 100]"
                 :current-page="page"
                 :page-size="limit"
@@ -30,7 +29,7 @@
         name: 'pagination-block',
         props: {
             limit: {type: Number, default: 10},
-            page: {type: Number, default: 0},
+            page: {type: Number, default: 1},
             total: {type: Number, default: 0},
         },
         methods: {
