@@ -2,7 +2,7 @@
     <div class="workersPermissions">
         <div class="workersPermissions__head">
             <div class="workersPermissions__head-search">
-                <el-input placeholder="Найти должность" :disabled="true"></el-input>
+                <el-input placeholder="Найти должность" v-model="search_query" @input="searchPosition"></el-input>
             </div>
             <div class="workersPermissions__head-delete">
                 <el-button plain @click="delete_several_position_dialog = true" :disabled="!selected.length"><i class="mdi mdi-delete"></i>Удалить выбранные</el-button>
@@ -14,10 +14,13 @@
                         :data="$store.state.positions.list"
                         border
                         @selection-change="handleSelectionChange"
+                        @sort-change="handleSortChange"
+                        v-loading="is_loading_data"
                         style="width: 100%">
                     <el-table-column type="selection" width="35"></el-table-column>
                     <el-table-column
                             label="Должность"
+                            prop="name"
                             sortable>
                         <template slot-scope="scope">
                             {{ scope.row.name }}
@@ -86,9 +89,11 @@
 
 <script>
     import { mapActions } from 'vuex';
+    import _ from 'lodash';
     export default {
         data(){
             return{
+                is_loading_data: false,
                 is_loading_process: false,
 
                 edit_position_dialog: false,
@@ -99,18 +104,11 @@
                 tmp_name: '',
 
                 selected: [],
-
-
-
-
-                dialogPermissionDelete: false,
-                dialogPermissionsDelete: false,
-                permissionGroup: '',
-                permissionsTable:[
-                    {group: 'Администратор', permission: 'admin'},
-                    {group: 'Менеджеры', permission: 'manager'},
-                    {group: 'Бухгалтерия', permission: 'bux'},
-                ]
+                search_query: '',
+                order: {
+                    name: 'createdAt',
+                    sort: 'ascending'
+                }
             }
         },
         watch: {
@@ -129,6 +127,9 @@
                         this.tmp_name = '';
                     }, 700);
                 }
+            },
+            search_query(val){
+                this.is_loading_data = true;
             }
         },
         created(){
@@ -144,8 +145,33 @@
                 // createPosition: 'positions/CREATE_NEW_POSITION',
                 // createEmployee: 'employees/CREATE_NEW_EMPLOYEE',
             }),
-            thisPermissionReturn(thisPermission){
-                this.permissionGroup = thisPermission;
+            searchPosition: _.debounce(
+                function(query){
+                    this.getPositionsWithParams();
+                }, 750
+            ),
+            getPositionsWithParams(){
+                this.getPositions({
+                    query: this.search_query,
+                    order: this.order
+                }).then(() => {
+                    this.is_loading_data = false;
+                });
+            },
+            handleSortChange(sort){
+                this.is_loading_data = true;
+                if(sort.prop === null && sort.order === null){
+                    this.order = {
+                        name: 'createdAt',
+                        sort: 'ascending'
+                    };
+                }else{
+                    this.order = {
+                        name: sort.prop,
+                        sort: sort.order
+                    }
+                }
+                this.getPositionsWithParams();
             },
             handleSelectionChange(val){
                 this.selected = val;
