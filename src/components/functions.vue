@@ -2,7 +2,7 @@
     <div class="workersPermissions">
         <div class="workersPermissions__head">
             <div class="workersPermissions__head-search">
-                <!--<el-input placeholder="Найти должность"></el-input>-->
+                <el-input placeholder="Найти должность" :disabled="true"></el-input>
             </div>
             <div class="workersPermissions__head-delete">
                 <el-button plain @click="delete_several_position_dialog = true" :disabled="!selected.length"><i class="mdi mdi-delete"></i>Удалить выбранные</el-button>

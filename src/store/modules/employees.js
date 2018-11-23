@@ -45,6 +45,10 @@ const store = {
                 obj = {
                     query: '',
                     gender: '',
+                    order: {
+                        name: 'full',
+                        sort: 'ascending'
+                    },
                     limit: 10,
                     page: 0,
                 }
@@ -57,6 +61,12 @@ const store = {
                             break;
                         case 'gender':
                             obj.gender = '';
+                            break;
+                        case 'order':
+                            obj.order = {
+                                name: 'full',
+                                sort: 'ascending'
+                            };
                             break;
                         case 'limit':
                             obj.limit = 10;
@@ -71,14 +81,12 @@ const store = {
                 try{
                     await r.table('employees').filter((user) => {
                         if(obj.query.length && obj.gender.length){
-                            return (user('surname').match(`${obj.query}`)
-                                .or(user('name').match(`${obj.query}`)))
+                            return user('full').match(`${obj.query}`)
                                 .and(user('gender').eq(obj.gender))
                                 .and(user('deletedAt').eq(null))
                         }
                         if(obj.query.length){
-                            return (user('surname').match(`${obj.query}`)
-                                .or(user('name').match(`${obj.query}`)))
+                            return user('full').match(`${obj.query}`)
                                 .and(user('deletedAt').eq(null))
                         }
                         if(obj.gender.length){
@@ -91,16 +99,23 @@ const store = {
                         }
                     );
 
-                    await r.table('employees').orderBy('name').filter((user) => {
+                    if(obj.order.name === null || obj.order.sort === null){
+                        obj.order = {
+                            name: 'full',
+                            sort: 'ascending'
+                        }
+                    }
+
+                    let order = obj.order.sort === 'ascending' ? obj.order.name : r.desc(obj.order.name);
+
+                    await r.table('employees').orderBy(order).filter((user) => {
                         if(obj.query.length && obj.gender.length){
-                            return (user('surname').match(`${obj.query}`)
-                                .or(user('name').match(`${obj.query}`)))
+                            return user('full').match(`${obj.query}`)
                                 .and(user('gender').eq(obj.gender))
                                 .and(user('deletedAt').eq(null))
                         }
                         if(obj.query.length){
-                            return (user('surname').match(`${obj.query}`)
-                                .or(user('name').match(`${obj.query}`)))
+                            return user('full').match(`${obj.query}`)
                                 .and(user('deletedAt').eq(null))
                         }
                         if(obj.gender.length){
@@ -144,6 +159,7 @@ const store = {
                     group_id: '',
                     login: '',
                     password: '',
+                    full: `${object.surname} ${object.name}${object.patronymic !== '' ? ' ' + object.patronymic : ''}`,
                     ...object,
 
                 }).run(conn, (error, data) => {
@@ -151,10 +167,10 @@ const store = {
                         console.error('CREATE_NEW_EMPLOYEE error: ', error);
                         reject(error);
                     }
-                    commit('CREATE_NEW_EMPLOYEE', {
-                        id: data.generated_keys[0],
-                        ...object
-                    });
+                    // commit('CREATE_NEW_EMPLOYEE', {
+                    //     id: data.generated_keys[0],
+                    //     ...object
+                    // });
                     resolve(data);
                 });
             });

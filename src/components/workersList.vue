@@ -15,6 +15,7 @@
                     style="width: 100%"
                     @selection-change="handleSelectionChange"
                     @filter-change="showFilter"
+                    @sort-change="handleSortChange"
                     :cell-class-name="cellClass">
                 <el-table-column
                         type="selection"
@@ -24,7 +25,9 @@
                 <el-table-column
                         label="ФИО"
                         sortable
-                        :resizable="false">
+                        :resizable="false"
+                        prop="full"
+                >
                     <template slot-scope="scope">
                         <router-link :to="`/employee/info/${scope.row.id}`" class="workersList__table-name" :title="scope.row.name">
                             {{ scope.row.surname }} {{ scope.row.name }}{{ scope.row.patronymic.length ? ' ' + scope.row.patronymic : ''}}
@@ -36,8 +39,6 @@
                         label="Пол"
                         :filters="[{text: 'Мужской', value: 'MALE'}, {text: 'Женский', value: 'FEMALE'}]"
                         :filter-multiple="false"
-
-
                         :resizable="false"
                         width="80"
                         prop="gender"
@@ -176,45 +177,9 @@
                 page: 0,
 
                 order: {
-                    name: 'fio',
-                    sort: 'ASC'
+                    name: 'full',
+                    sort: 'ascending'
                 }
-
-                // value: '',
-                // value2: '',
-                //
-                // dialogUserDelete: false,
-                // dialogGroupDelete: false,
-
-
-                // usersTable: [
-                //     {
-                //         mail: 'ali.adams@yahoo.com',
-                //         name: 'Константинопольский Константин Александрович',
-                //         phone: '+7 831-090-2171',
-                //         link: '/personCard',
-                //         gender: 'Человек',
-                //         city: 'Нижний Новгород',
-                //         tags: [
-                //             {name: 'Продукты питания'},
-                //             {name: 'Продукты питания'},
-                //             {name: 'Одежда'},
-                //         ]
-                //     },
-                //     {
-                //         mail: 'valentin.runolfsson@erdman.net',
-                //         name: 'Алексеева Светлана Николаевна',
-                //         phone: '909-828-7928',
-                //         link: '/personCard',
-                //         gender: 'Почти человек',
-                //         city: 'Воронеж',
-                //         tags: [
-                //             {name: 'Электроника'},
-                //             {name: 'Прочее'},
-                //         ]
-                //     },
-                // ]
-
             }
         },
         watch: {
@@ -236,10 +201,11 @@
                 getEmployees: 'employees/GET_EMPLOYEES_LIST',
             }),
             getSpecificData(){
-                console.log(' -== Before send data ==-', '\nquery: ', this.search, '\ngender: ', this.gender, '\nlimit: ', this.limit, '\nskip: ', this.page);
+                console.log(' -== Before send data ==-', '\nquery: ', this.search, '\ngender: ', this.gender, '\noder: ', this.order, '\nlimit: ', this.limit, '\nskip: ', this.page);
                 this.getEmployees({
                     query: this.search,
                     gender: this.gender,
+                    order: this.order,
                     limit: this.limit,
                     page: this.page,
                 }).then(result => {
@@ -265,6 +231,14 @@
                     // });
                 }, 1000
             ),
+            handleSortChange(sort){
+                this.order = {
+                    name: sort.prop,
+                    sort: sort.order
+                };
+
+                this.getSpecificData();
+            },
             deleteWorkers(){
                 this.is_loading_action = true;
 
