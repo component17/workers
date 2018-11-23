@@ -13,6 +13,7 @@
                     :data="list"
                     border
                     style="width: 100%"
+                    v-loading="is_loading_data"
                     @selection-change="handleSelectionChange"
                     @filter-change="showFilter"
                     @sort-change="handleSortChange"
@@ -162,6 +163,7 @@
         },
         data() {
             return {
+                is_loading_data: false,
                 is_loading_action: false,
                 dialog_delete_user: false,
                 dialog_delete_workers: false,
@@ -177,7 +179,7 @@
                 page: 0,
 
                 order: {
-                    name: 'full',
+                    name: 'createdAt',
                     sort: 'ascending'
                 }
             }
@@ -189,6 +191,12 @@
                         this.tmp_user = '';
                     }, 700);
                 }
+            },
+            search(){
+                this.is_loading_data = true;
+            },
+            gender(){
+                this.is_loading_data = true;
             }
         },
         created(){
@@ -201,41 +209,47 @@
                 getEmployees: 'employees/GET_EMPLOYEES_LIST',
             }),
             getSpecificData(){
-                console.log(' -== Before send data ==-', '\nquery: ', this.search, '\ngender: ', this.gender, '\noder: ', this.order, '\nlimit: ', this.limit, '\nskip: ', this.page);
                 this.getEmployees({
                     query: this.search,
                     gender: this.gender,
                     order: this.order,
                     limit: this.limit,
                     page: this.page,
-                }).then(result => {
-                    console.log('Get new employees list: ', result);
+                }).then(() => {
+                    this.is_loading_data = false;
                 });
             },
-            showFilter: _.debounce(
-                function(data){
-                    let value = data['el-table_1_column_3'];
-                    if(value.length){
+            showFilter(data){
+                for(let i in data){
+                    let value = data[i];
+
+                    if(value.length > 0){
                         this.gender = value[0];
                     }else{
                         this.gender = '';
                     }
-                    this.getSpecificData();
-                }, 300
-            ),
+                    break;
+                }
+
+                this.getSpecificData();
+            },
             searchEmployee: _.debounce(
                 function(query){
                     this.getSpecificData();
-                    // this.getEmployees(query).then(result => {
-                    //     console.log('Get new employees list: ', result);
-                    // });
-                }, 1000
+                }, 750
             ),
             handleSortChange(sort){
-                this.order = {
-                    name: sort.prop,
-                    sort: sort.order
-                };
+                if(sort.prop === null && sort.order === null){
+                    this.order = {
+                        name: 'createdAt',
+                        sort: 'ascending'
+                    };
+                }else{
+                    this.order = {
+                        name: sort.prop,
+                        sort: sort.order
+                    }
+                }
 
                 this.getSpecificData();
             },
@@ -253,8 +267,6 @@
                 }
 
                 this.deleteEmployees(formed_array).then(res => {
-                    console.log('Delete employees result: ', res);
-
                     this.$notify.success({
                         title: 'Ошибка',
                         message: `${formed_array.length > 1 ? 'Пользователи были удалены' : 'Пользователь был удален'}`,

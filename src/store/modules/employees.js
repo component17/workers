@@ -46,37 +46,37 @@ const store = {
                     query: '',
                     gender: '',
                     order: {
-                        name: 'full',
+                        name: 'createdAt',
                         sort: 'ascending'
                     },
                     limit: 10,
                     page: 0,
                 }
             }
-            for(let i in obj){
-                if(obj[i] === undefined){
-                    switch (i){
-                        case 'query':
-                            obj.query = '';
-                            break;
-                        case 'gender':
-                            obj.gender = '';
-                            break;
-                        case 'order':
-                            obj.order = {
-                                name: 'full',
-                                sort: 'ascending'
-                            };
-                            break;
-                        case 'limit':
-                            obj.limit = 10;
-                            break;
-                        case 'page':
-                            obj.page = 1;
-                            break;
-                    }
-                }
-            }
+            // for(let i in obj){
+            //     if(obj[i] === undefined){
+            //         switch (i){
+            //             case 'query':
+            //                 obj.query = '';
+            //                 break;
+            //             case 'gender':
+            //                 obj.gender = '';
+            //                 break;
+            //             case 'order':
+            //                 obj.order = {
+            //                     name: 'createdAt',
+            //                     sort: 'ascending'
+            //                 };
+            //                 break;
+            //             case 'limit':
+            //                 obj.limit = 10;
+            //                 break;
+            //             case 'page':
+            //                 obj.page = 1;
+            //                 break;
+            //         }
+            //     }
+            // }
             return new Promise(async (resolve, reject) => {
                 try{
                     await r.table('employees').filter((user) => {
@@ -153,6 +153,7 @@ const store = {
         CREATE_NEW_EMPLOYEE({commit, dispatch, state}, object){
             return new Promise((resolve, reject) => {
                 r.table('employees').insert({
+                    createdAt: r.now(),
                     deletedAt: null,
                     uid: '',
                     email: '',
