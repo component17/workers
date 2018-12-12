@@ -150,30 +150,36 @@ const store = {
                 }
             });
         },
-        CREATE_NEW_EMPLOYEE({commit, dispatch, state}, object){
+        async CREATE_NEW_EMPLOYEE({commit, dispatch, state}, object){
             return new Promise((resolve, reject) => {
-                r.table('employees').insert({
-                    createdAt: r.now(),
-                    deletedAt: null,
-                    uid: '',
-                    email: '',
-                    group_id: '',
-                    login: '',
-                    password: '',
-                    full: `${object.surname} ${object.name}${object.patronymic !== '' ? ' ' + object.patronymic : ''}`,
-                    ...object,
+                generatePinCode().then(pin => {
+                    console.log('Empty pin code is: ', pin)
+                    return pin;
+                }).then((pin) => {
+                    r.table('employees').insert({
+                        createdAt: r.now(),
+                        deletedAt: null,
+                        uid: '',
+                        email: '',
+                        group_id: '',
+                        login: '',
+                        password: pin,
+                        full: `${object.surname} ${object.name}${object.patronymic !== '' ? ' ' + object.patronymic : ''}`,
+                        ...object,
 
-                }).run(conn, (error, data) => {
-                    if(error){
-                        console.error('CREATE_NEW_EMPLOYEE error: ', error);
-                        reject(error);
-                    }
-                    // commit('CREATE_NEW_EMPLOYEE', {
-                    //     id: data.generated_keys[0],
-                    //     ...object
-                    // });
-                    resolve(data);
+                    }).run(conn, (error, data) => {
+                        if(error){
+                            console.error('CREATE_NEW_EMPLOYEE error: ', error);
+                            reject(error);
+                        }
+                        // commit('CREATE_NEW_EMPLOYEE', {
+                        //     id: data.generated_keys[0],
+                        //     ...object
+                        // });
+                        resolve(data);
+                    });
                 });
+
             });
         },
         BLOCK_EMPLOYEE({commit, dispatch, state}, id){
@@ -242,8 +248,63 @@ const store = {
                 });
             });
         },
+        CHECK_PIN_DUBLICATE({commit, dispatch, state}, pin){
+            try{
+                return new Promise((resolve, reject) => {
+                    r.table('employees').filter({password: pin}).run(conn, (error, cursor) => {
+                        if(error) rejecct(error);
+                        cursor.toArray((err, data) => {
+                            if(err){
+                                reject(err)
+                            }
+
+                            console.log('Request data: ', data);
+                            if(!data.length){
+                                resolve(true);
+                            }else{
+                                resolve(false);
+                            }
+                        });
+                    });
+                });
+            }catch(err){
+                console.log('Check pin-code error: ', err);
+            }
+        }
     }
 };
+
+function generatePinCode(){
+    return new Promise((resolve, reject) => {
+        Vue.prototype.$pin.generatePin(6, pin => {
+            console.log('Get pin code: ', pin);
+            r.table('employees').filter({password: pin}).run(conn, (error, cursor) => {
+                if(error) rejecct(error);
+                cursor.toArray((err, data) => {
+                    if(err){
+                        reject(err)
+                    }
+
+                    console.log('Request data: ', data, '\nPin is: ', pin);
+
+                    if(!data.length){
+                        resolve(pin);
+                    }else{
+                        generatePinCode();
+                    }
+                });
+            });
+
+
+
+            // dispatch('CHECK_PIN_DUBLICATE', pin).then(res => {
+            //     console.log('Get result: ', res);
+            //     if(res) resolve(pin);
+            //     else generatePinCode();
+            // });
+        });
+    });
+}
 
 // function populate(connect, left, rigth, field){
 //     return new Promise((resolve, reject) => {

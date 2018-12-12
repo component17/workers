@@ -24,19 +24,21 @@
             </el-form-item>
 
 
-            <h2>Сторонние приложения <el-checkbox v-model="software_checked" v-if="!showApp">Предоставить</el-checkbox></h2>
-            <p>Указанные данные предназначены для авторизации в стороннем ПО (приложения для ТСД, кассы, приложения контроля заказов и др.) Пароль должен
-                содержать не менее 4 символов.</p>
+            <!--<h2>Сторонние приложения <el-checkbox v-model="software_checked" v-if="!showApp">Предоставить</el-checkbox></h2>-->
+            <h2>Сторонние приложения</h2>
+            <p>Указанные данные предназначены для авторизации в стороннем ПО (приложения для ТСД, кассы, приложения контроля заказов и др.) Пароль ниже
+                нужно указать в стороннем приложении.</p>
 
-            <el-form-item label="Логин" :required="software_checked" prop="login" v-if="software_checked">
+            <!--<el-form-item label="Логин" :required="software_checked" prop="login" v-if="software_checked">-->
+                <!--<div class="form__mediumInput">-->
+                    <!--<el-input placeholder="Укажите логин пользователя" v-model="model.login" ref="loginInput" :disabled="disabledEdit"/>-->
+                <!--</div>-->
+            <!--</el-form-item>-->
+            <el-form-item label="Пароль" :required="software_checked" prop="password">
+                <!--v-if="software_checked"-->
                 <div class="form__mediumInput">
-                    <el-input placeholder="Укажите логин пользователя" v-model="model.login" ref="loginInput" :disabled="disabledEdit"/>
-                </div>
-            </el-form-item>
-            <el-form-item label="Пароль" :required="software_checked" prop="password" v-if="software_checked">
-                <div class="form__mediumInput">
-                    <el-input placeholder="Укажите пароль" v-model="model.password" :disabled="disabledEdit">
-                        <el-button slot="append" @click="generatePassword" :disabled="disabledEdit">Сгенерировать</el-button>
+                    <el-input placeholder="Укажите пароль" v-model="model.password" ref="pinInput" :disabled="true">
+                        <!--<el-button slot="append" @click="generatePassword" :disabled="disabledEdit">Сгенерировать</el-button>-->
                     </el-input>
                 </div>
             </el-form-item>
@@ -79,8 +81,8 @@
                     email: '',
                     group_id: '',
 
-                    login: '',
-                    password: ''
+                    // login: '',
+                    // password: ''
                 },
 
                 rules: {
@@ -91,25 +93,25 @@
                     group_id: [
                         { required: true, message: 'Выберите группу для сотрудника', trigger: ['change' ,'blur'] },
                     ],
-                    login: [
-                        { required: true, message: 'Логин является обязательным полем', trigger: ['change' ,'blur'] },
-                        { min: 3, message: 'Логин должен быть минимум 3 символа', trigger: 'blur' }
-                    ],
-                    password: [
-                        { required: true, message: 'Пароль является обязательным полем', trigger: ['change' ,'blur'] },
-                        { min: 4, message: 'Пароль должен быть минимум в 4 символа', trigger: 'blur' }
-                    ]
+                    // login: [
+                    //     { required: true, message: 'Логин является обязательным полем', trigger: ['change' ,'blur'] },
+                    //     { min: 3, message: 'Логин должен быть минимум 3 символа', trigger: 'blur' }
+                    // ],
+                    // password: [
+                    //     { required: true, message: 'Пароль является обязательным полем', trigger: ['change' ,'blur'] },
+                    //     { min: 4, message: 'Пароль должен быть минимум в 4 символа', trigger: 'blur' }
+                    // ]
                 },
             }
         },
         watch:{
-            software_checked(value){
-                if(value){
-                    setTimeout(() => {
-                        this.$refs.loginInput.focus();
-                    }, 100)
-                }
-            },
+            // software_checked(value){
+            //     if(value){
+            //         setTimeout(() => {
+            //             this.$refs.pinInput.focus();
+            //         }, 100)
+            //     }
+            // },
             account_checked(value){
                 if(value){
                     setTimeout(() => {
@@ -124,7 +126,7 @@
                 email: this.main.email ? this.main.email : '',
                 group_id: this.main.group_id ? this.main.group_id : '',
 
-                login: this.main.login ? this.main.login : '',
+                // login: this.main.login ? this.main.login : '',
                 password: this.main.password ? this.main.password : ''
             };
 
@@ -132,10 +134,8 @@
                 if(this.$store.state.groups.list[i].id !== this.model.group_id) this.model.group_id = '';
             }
 
-            if(this.model.uid.length){
-                this.account_checked = true;
-            }
-            if(this.model.login.length){
+
+            if(this.model.password.length){
                 this.software_checked = true;
             }
 
@@ -150,6 +150,7 @@
             ...mapActions({
                 getEmployee: 'employees/GET_EMPLOYEE',
                 updateEmployeeAccess: 'employees/UPDATE_EMPLOYEE_ACCESS',
+                checkPin: 'employees/CHECK_PIN_DUBLICATE'
 
             }),
             inviteUser(){
@@ -197,12 +198,20 @@
                 });
             },
             generatePassword(){
-                let chars = "1234567890";
-                this.model.password = '';
-
-                for (let x = 0; x < 4; x++) {
-                    this.model.password += chars.charAt(Math.floor(Math.random() * chars.length));
-                }
+                this.$pin.generatePin(1, pin => {
+                    this.checkPin(pin).then(res => {
+                        console.log('Got answer: ', res);
+                        if(res) this.model.password = pin;
+                        else this.generatePassword();
+                    })
+                    // this.model.password = pin;
+                });
+                // let chars = "1234567890";
+                // this.model.password = '';
+                //
+                // for (let x = 0; x < 6; x++) {
+                //     this.model.password += chars.charAt(Math.floor(Math.random() * chars.length));
+                // }
             },
             loading(value){
                 this.is_loading_action = value;

@@ -7,6 +7,7 @@ import store from './store/index'
 
 Vue.prototype.$isDeveloper = process.env.NODE_ENV === 'development';
 Vue.prototype.$hash = require('object-hash');
+Vue.prototype.$pin = require('secure-pin');
 
 import uPoint from 'upoint-vue-ui';
 import locale from 'upoint-vue-ui/locale/lang/ru-RU'
@@ -15,6 +16,8 @@ import 'upoint-vue-ui/assets/css/main.css'
 import './assets/main.css'
 
 import draggable from 'vuedraggable'
+
+// import securePin from 'secure-pin'
 
 import workersList from './components/workersList'
 import permissions from './components/permissions'

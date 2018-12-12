@@ -7,7 +7,7 @@ module.exports = {
     endpoint: {
         dev: {
             type: "web",
-            url: 'http://localhost:8080'
+            url: 'http://localhost:8082'
         },
         prod: {
             type: 'file',
