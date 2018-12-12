@@ -46,7 +46,7 @@
         <div class="personCard__tabs">
             <el-tabs v-model="activeName" type="border-card">
                 <el-tab-pane label="Доступ к ПО" name="accessPO">
-                    <newWorkerAccessPO :main="employee" showStatus showApp disabledEdit/>
+                    <newWorkerAccessPO :main="employee" :showStatus="showAccount" showApp disabledEdit/>
                 </el-tab-pane>
                 <!--<el-tab-pane label="Контакты" name="contacts">-->
                 <!--<newWorkerContacts/>-->
@@ -71,6 +71,8 @@
                 current_id: null,
                 action_in_process: false,
 
+                showAccount: false,
+
                 employee: null
             }
         },
@@ -81,6 +83,9 @@
                 this.getEmployee(this.current_id).then(result => {
                     console.log('employee information: ', result);
                     this.employee = result;
+                    if(this.employee.uid.length){
+                        this.showAccount = true;
+                    }
                 })
             });
 

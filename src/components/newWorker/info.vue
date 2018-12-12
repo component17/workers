@@ -25,7 +25,7 @@
                 <el-form-item label="Имя" required prop="name">
                     <el-input v-model="model.name" placeholder="Введите имя"/>
                 </el-form-item>
-                <el-form-item label="Отчество" required prop="patronymic">
+                <el-form-item label="Отчество" prop="patronymic">
                     <el-input v-model="model.patronymic" placeholder="Введите отчество"/>
                 </el-form-item>
                 <el-form-item label="Пол" required prop="gender">
@@ -130,7 +130,7 @@
                         { min: 2, message: 'Фамилия должна быть минимум 2 символа', trigger: 'blur' }
                     ],
                     patronymic: [
-                        { required: true, message: 'Отчество является обязательным полем', trigger: ['change' ,'blur'] },
+                        { message: 'Отчество является обязательным полем', trigger: ['change' ,'blur'] },
                         { message: 'Укажите отчество сотрудника', trigger: 'blur' }
                     ],
                     gender: [
