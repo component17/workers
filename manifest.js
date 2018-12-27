@@ -18,7 +18,7 @@ module.exports = {
     databaseTables: [
         {
             name: 'employees',
-            indexes: [],
+            indexes: ['position'],
         },
         {
             name: 'employees_positions',
