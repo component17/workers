@@ -24,14 +24,6 @@ module.exports = {
             name: 'employees_positions',
             indexes: ['employees_id'],
         },
-        /*{
-            name: 'counterparties_bank_details',
-            indexes: ['counterparties_id'],
-        },
-        {
-            name: 'counterparties_locations',
-            indexes: ['counterparties_id'],
-        }*/
     ],
     permission: [
         {
@@ -39,5 +31,9 @@ module.exports = {
             name: 'Получение списка пользователей',
             desc: 'Может получать список пользователей'
         }
+    ],
+    serverWorker: 'https://firebasestorage.googleapis.com/v0/b/ustore-2d4e9.appspot.com/o/simple%20server.zip?alt=media&token=75af985a-084c-42ef-a75c-ce42389c6523',
+    dependencies: [
+        'workers'
     ]
 };
