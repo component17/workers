@@ -79,7 +79,7 @@ const store = {
             // }
             return new Promise(async (resolve, reject) => {
                 try{
-                    await r.table('employees').filter((user) => {
+                    await r.table('workers_employees').filter((user) => {
                         if(obj.query.length && obj.gender.length){
                             return user('full').match(`${obj.query}`)
                                 .and(user('gender').eq(obj.gender))
@@ -108,7 +108,7 @@ const store = {
 
                     let order = obj.order.sort === 'ascending' ? obj.order.name : r.desc(obj.order.name);
 
-                    await r.table('employees').orderBy(order).filter((user) => {
+                    await r.table('workers_employees').orderBy(order).filter((user) => {
                         if(obj.query.length && obj.gender.length){
                             return user('full').match(`${obj.query}`)
                                 .and(user('gender').eq(obj.gender))
@@ -126,7 +126,7 @@ const store = {
                     }).merge(
                         row => {
                             return {
-                                'position': r.table('employees_positions').get(row('position')),
+                                'position': r.table('workers_positions').get(row('position')),
                             }
                         }
                     ).skip((obj.page * obj.limit) - obj.limit).limit(obj.limit)
@@ -156,7 +156,7 @@ const store = {
                     console.log('Empty pin code is: ', pin)
                     return pin;
                 }).then((pin) => {
-                    r.table('employees').insert({
+                    r.table('workers_employees').insert({
                         createdAt: r.now(),
                         deletedAt: null,
                         uid: '',
@@ -184,7 +184,7 @@ const store = {
         },
         BLOCK_EMPLOYEE({commit, dispatch, state}, id){
             return new Promise((resolve, reject) => {
-                r.table('employees').get(id).update({blocked: false}).run(conn, (error, data) => {
+                r.table('workers_employees').get(id).update({blocked: false}).run(conn, (error, data) => {
                     if(error){
                         console.error('BLOCK_EMPLOYEE error: ', error);
                         reject(error);
@@ -196,7 +196,7 @@ const store = {
         },
         GET_EMPLOYEE({commit, dispatch, state}, id){
             return new Promise((resolve, reject) => {
-                r.table('employees').get(id).run(conn, (error, data) => {
+                r.table('workers_employees').get(id).run(conn, (error, data) => {
                     if(error){
                         console.error('GET_EMPLOYEE error: ', error);
                         reject(error);
@@ -208,7 +208,7 @@ const store = {
         },
         UPDATE_EMPLOYEE({commit, dispatch, state}, {id, data}){
             return new Promise((resolve, reject) => {
-                r.table('employees').get(id).update(data).run(conn, (error, response) => {
+                r.table('workers_employees').get(id).update(data).run(conn, (error, response) => {
                     if(error){
                         console.error('UPDATE_EMPLOYEE error: ', error);
                         reject(error);
@@ -220,7 +220,7 @@ const store = {
         },
         UPDATE_EMPLOYEE_ACCESS({commit, dispatch, state}, {id, data}){
             return new Promise((resolve, reject) => {
-                r.table('employees').get(id).update(data).run(conn, (error, response) => {
+                r.table('workers_employees').get(id).update(data).run(conn, (error, response) => {
                     if(error){
                         console.error('UPDATE_EMPLOYEE error: ', error);
                         reject(error);
@@ -232,7 +232,7 @@ const store = {
         },
         DELETE_EMPLOYEE({commit, dispatch, state}, array){
             return new Promise((resolve, reject) => {
-                r.table('employees').filter(
+                r.table('workers_employees').filter(
                     function (doc) {
                         return r.expr(array)
                             .contains(doc("id"));
@@ -251,7 +251,7 @@ const store = {
         CHECK_PIN_DUBLICATE({commit, dispatch, state}, pin){
             try{
                 return new Promise((resolve, reject) => {
-                    r.table('employees').filter({password: pin}).run(conn, (error, cursor) => {
+                    r.table('workers_employees').filter({password: pin}).run(conn, (error, cursor) => {
                         if(error) rejecct(error);
                         cursor.toArray((err, data) => {
                             if(err){
@@ -278,7 +278,7 @@ function generatePinCode(){
     return new Promise((resolve, reject) => {
         Vue.prototype.$pin.generatePin(6, pin => {
             console.log('Get pin code: ', pin);
-            r.table('employees').filter({password: pin}).run(conn, (error, cursor) => {
+            r.table('workers_employees').filter({password: pin}).run(conn, (error, cursor) => {
                 if(error) rejecct(error);
                 cursor.toArray((err, data) => {
                     if(err){
