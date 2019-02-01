@@ -4,6 +4,7 @@ import Vue from 'vue'
 import App from './App'
 import router from './router'
 import store from './store/index'
+import * as Sentry from '@sentry/browser'
 
 Vue.prototype.$isDeveloper = process.env.NODE_ENV === 'development';
 Vue.prototype.$hash = require('object-hash');
@@ -57,6 +58,16 @@ Vue.component('workTable', workTable);
 
 Vue.use(uPoint, {size: 'mini', locale});
 
+Sentry.init({
+    dsn: 'https://31dc18a5a5de4cc3a5fbc006f2cf733a@sentry.io/1372957',
+    integrations: [new Sentry.Integrations.Vue({ Vue })]
+});
+
+Vue.config.errorHandler = (err, vm, info) => {
+    // Обработка ошибки. В `info` подробности Vue-специфичной ошибки,
+    // например, в каком хуке жизненного цикла произошла ошибка.
+    // Доступно только в версиях 2.2.0+
+}
 
 Vue.config.productionTip = false;
 
