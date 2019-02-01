@@ -7,7 +7,7 @@ module.exports = {
     endpoint: {
         dev: {
             type: "web",
-            url: 'http://localhost:8082'
+            url: 'http://localhost:9004'
         },
         prod: {
             type: 'file',
@@ -21,19 +21,8 @@ module.exports = {
             indexes: ['position'],
         },
         {
-            name: 'employees_positions',
+            name: 'positions',
             indexes: ['employees_id'],
         },
-    ],
-    permission: [
-        {
-            key: 'user-get-all',
-            name: 'Получение списка пользователей',
-            desc: 'Может получать список пользователей'
-        }
-    ],
-    serverWorker: 'https://firebasestorage.googleapis.com/v0/b/ustore-2d4e9.appspot.com/o/simple%20server.zip?alt=media&token=75af985a-084c-42ef-a75c-ce42389c6523',
-    dependencies: [
-        'workers'
     ]
 };

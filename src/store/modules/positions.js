@@ -37,7 +37,7 @@ const store = {
             let order = obj.order.sort === 'ascending' ? obj.order.name : r.desc(obj.order.name);
 
             return new Promise((resolve, reject) => {
-                r.table('employees_positions').orderBy(order).filter(position => {
+                r.table('workers_positions').orderBy(order).filter(position => {
                     if(obj.query.length){
                         return position('name').match(`${obj.query}`)
                             .and(position('deletedAt').eq(null))
@@ -62,7 +62,7 @@ const store = {
         },
         CREATE_NEW_POSITION({commit, dispatch, state}, name){
             return new Promise((resolve, reject) => {
-                r.table('employees_positions').insert({
+                r.table('workers_positions').insert({
                     createdAt: r.now(),
                     name: name,
                     deletedAt: null
@@ -82,7 +82,7 @@ const store = {
         },
         UPDATE_POSITION({commit, dispatch, state}, {index, name}){
             return new Promise((resolve, reject) => {
-                r.table('employees_positions').get(state.list[index].id).update({
+                r.table('workers_positions').get(state.list[index].id).update({
                     name: name,
                 }).run(conn, (error, data) => {
                     if(error){
